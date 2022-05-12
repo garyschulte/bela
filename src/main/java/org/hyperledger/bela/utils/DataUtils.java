@@ -1,6 +1,8 @@
 package org.hyperledger.bela.utils;
 
 import org.hyperledger.bela.config.BelaConfigurationImpl;
+import org.hyperledger.bela.converter.RocksDBKeyValueStorageConverterFactory;
+
 import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueStorageProviderBuilder;
@@ -19,7 +21,7 @@ public class DataUtils {
             final Path dataDir, final Path dbDir) {
         return new KeyValueStorageProviderBuilder()
                 .withStorageFactory(
-                        new RocksDBKeyValueStorageFactory(
+                        new RocksDBKeyValueStorageConverterFactory(
                                 () ->
                                         new RocksDBFactoryConfiguration(
                                                 RocksDBCLIOptions.DEFAULT_MAX_OPEN_FILES,

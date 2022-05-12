@@ -3,6 +3,9 @@ package org.hyperledger.bela.trie;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.datatypes.Hash;
+import org.hyperledger.besu.ethereum.core.BlockHeader;
+import org.hyperledger.besu.ethereum.core.BlockHeaderFunctions;
+import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
@@ -24,25 +27,42 @@ public class TrieTraversal {
     private static final Bytes CHAIN_HEAD_KEY =
             Bytes.wrap("chainHeadHash".getBytes(StandardCharsets.UTF_8));
     private static final Bytes VARIABLES_PREFIX = Bytes.of(1);
+    static final Bytes BLOCK_HEADER_PREFIX = Bytes.of(2);
+
 
     private final NodeRetriever storageNodeFinder;
     private final NodeFoundListener nodeFoundListener;
 
     private final KeyValueStorage blockchainStorage;
+    private final BlockHeaderFunctions blockHeaderFunctions;
 
     public TrieTraversal(final StorageProvider storageProvider, final NodeRetriever storageNodeFinder, final NodeFoundListener nodeFoundListener) {
+        this(storageProvider, storageNodeFinder, nodeFoundListener, new MainnetBlockHeaderFunctions());
+    }
+
+    public TrieTraversal(final StorageProvider storageProvider, final NodeRetriever storageNodeFinder, final NodeFoundListener nodeFoundListener, final BlockHeaderFunctions blockHeaderFunctions) {
         this.storageNodeFinder = storageNodeFinder;
         blockchainStorage = storageProvider.getStorageBySegmentIdentifier(KeyValueSegmentIdentifier.BLOCKCHAIN);
         this.nodeFoundListener = nodeFoundListener;
+        this.blockHeaderFunctions = blockHeaderFunctions;
     }
 
     public void start(){
-        final Bytes32 rootHash = blockchainStorage.get(Bytes.concatenate(VARIABLES_PREFIX, CHAIN_HEAD_KEY)
-                        .toArrayUnsafe()).map(Bytes32::wrap)
-                .orElseThrow(() -> new RuntimeException("root hash not found"));
+        final Hash rootHash = blockchainStorage.get(Bytes.concatenate(VARIABLES_PREFIX, CHAIN_HEAD_KEY)
+                .toArrayUnsafe()).map(Bytes32::wrap)
+            .flatMap(blockHash -> get(BLOCK_HEADER_PREFIX, blockHash)
+                .map(b -> BlockHeader.readFrom(RLP.input(b), blockHeaderFunctions)))
+            .map(BlockHeader::getStateRoot)
+            .orElseThrow(() -> new RuntimeException("chain head not found"));
+
+
 
         Node<Bytes> root = getAccountNodeValue(rootHash, Bytes.EMPTY);
         traverseAccountTrie(root);
+    }
+
+    Optional<Bytes> get(final org.apache.tuweni.bytes.Bytes prefix, final org.apache.tuweni.bytes.Bytes key) {
+        return blockchainStorage.get(org.apache.tuweni.bytes.Bytes.concatenate(prefix, key).toArrayUnsafe()).map(org.apache.tuweni.bytes.Bytes::wrap);
     }
 
 
