@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.base.Supplier;
+
+import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
 import org.hyperledger.besu.plugin.services.BesuConfiguration;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.hyperledger.besu.plugin.services.exception.StorageException;
@@ -57,20 +59,43 @@ public class RocksDBKeyValueStorageConverterFactory implements KeyValueStorageFa
             final MetricsSystem metricsSystem)
             throws StorageException {
 
+//        if (requiresInit()) {
+//            init(commonConfiguration);
+//        }
+//        if (segmentedStorage == null) {
+//            final List<SegmentIdentifier> segmentsForVersion =
+//                    segments.stream()
+//                            .collect(Collectors.toList());
+//            segmentedStorage =
+//                    new RocksDBColumnarKeyValueStorage(
+//                            rocksDBConfiguration, segmentsForVersion, metricsSystem, rocksDBMetricsFactory);
+//        }
+//        return new SegmentedKeyValueStorageAdapter<>(segment, segmentedStorage);
+        return destructiveRecreateAsBonsai(segment, commonConfiguration, metricsSystem);
+    }
+
+    public KeyValueStorage destructiveRecreateAsBonsai(
+        final SegmentIdentifier segment,
+        final BesuConfiguration commonConfiguration,
+        final MetricsSystem metricsSystem) {
+
+
         if (requiresInit()) {
             init(commonConfiguration);
         }
         if (segmentedStorage == null) {
             final List<SegmentIdentifier> segmentsForVersion =
-                    segments.stream()
-                            .collect(Collectors.toList());
+                segments.stream()
+                    .collect(Collectors.toList());
             segmentedStorage =
-                    new RocksDBColumnarKeyValueStorage(
-                            rocksDBConfiguration, segmentsForVersion, metricsSystem, rocksDBMetricsFactory);
+                new UnsafeRocksDBColumnarKeyValueStorage(
+                    rocksDBConfiguration, segmentsForVersion, metricsSystem, rocksDBMetricsFactory)
+                    .dropSegment(KeyValueSegmentIdentifier.WORLD_STATE)
+                    .dropSegment(KeyValueSegmentIdentifier.PRUNING_STATE);
+
         }
         return new SegmentedKeyValueStorageAdapter<>(segment, segmentedStorage);
     }
-
 
     @Override
     public boolean isSegmentIsolationSupported() {
