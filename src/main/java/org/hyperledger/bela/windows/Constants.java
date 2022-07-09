@@ -28,6 +28,7 @@ public class Constants {
     public static final Character KEY_LOOKUP_BY_HASH = '/';
     public static final Character KEY_LOOKUP_BY_NUMBER = '?';
     public static final Character KEY_ROLL_HEAD = 'r';
+    public static final Character KEY_DELETE_BY_HASH = 'D';
     public static final Character KEY_START = 's';
     public static final Character KEY_CONVERT_TO_FOREST = 'f';
     public static final Character KEY_CONVERT_TO_BONSAI = 'b';

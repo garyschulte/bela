@@ -17,19 +17,31 @@
 
 package org.hyperledger.bela.utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import com.googlecode.lanterna.gui2.Component;
 import com.googlecode.lanterna.gui2.Panel;
+import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.bela.components.BlockPanel;
 import org.hyperledger.bela.components.BelaComponent;
 import org.hyperledger.bela.components.SummaryPanel;
 import org.hyperledger.bela.model.BlockResult;
 import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.ethereum.bonsai.BonsaiWorldStateKeyValueStorage;
+import org.hyperledger.besu.ethereum.chain.BlockchainStorage;
 import org.hyperledger.besu.ethereum.chain.DefaultBlockchain;
 import org.hyperledger.besu.ethereum.core.Block;
+import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueStoragePrefixedKeyBlockchainStorage;
+import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
+import org.hyperledger.besu.plugin.services.storage.rocksdb.RocksDbSegmentIdentifier;
 
 public class BlockChainBrowser {
+
+    static final Bytes BLOCK_HEADER_PREFIX = Bytes.of(2);
+    private static final Bytes BLOCK_BODY_PREFIX = Bytes.of(3);
+    private static final Bytes BLOCK_HASH_PREFIX = Bytes.of(5);
+
 
     private final BonsaiWorldStateKeyValueStorage worldStateStorage;
     private final DefaultBlockchain blockchain;
@@ -119,6 +131,31 @@ public class BlockChainBrowser {
             blockchain.rewindToBlock(Hash.fromHexString(blockResult.get().getHash()));
             updateSummary();
         }
+    }
+
+    public void deleteHash(Hash blockHash) {
+        try {
+            final Field trieLogField = BonsaiWorldStateKeyValueStorage.class.getDeclaredField("trieLogStorage");
+            trieLogField.setAccessible(true);
+            final Field blockchainStorageField = DefaultBlockchain.class.getDeclaredField("blockchainStorage");
+            blockchainStorageField.setAccessible(true);
+            var blockchainStorage = (KeyValueStoragePrefixedKeyBlockchainStorage) blockchainStorageField.get(blockchain);
+            var updater = blockchainStorage.updater();
+            final Method remove = KeyValueStoragePrefixedKeyBlockchainStorage.Updater.class.getDeclaredMethod("remove", Bytes.class, Bytes.class);
+            remove.setAccessible(true);
+
+            remove.invoke(updater, BLOCK_HASH_PREFIX, blockHash);
+            remove.invoke(updater, BLOCK_HEADER_PREFIX, blockHash);
+            remove.invoke(updater, BLOCK_BODY_PREFIX, blockHash);
+            updater.commit();
+
+            var trieLogStorage = (KeyValueStorage) trieLogField.get(worldStateStorage);
+            trieLogStorage.tryDelete(blockHash.toArrayUnsafe());
+
+        } catch(Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        updateSummary();
     }
 
     private void updateSummary() {

@@ -25,6 +25,7 @@ import static kr.pe.kwonnam.slf4jlambda.LambdaLoggerFactory.getLogger;
 import static org.hyperledger.bela.windows.Constants.KEY_BACK;
 import static org.hyperledger.bela.windows.Constants.KEY_BEGINNING;
 import static org.hyperledger.bela.windows.Constants.KEY_CLOSE;
+import static org.hyperledger.bela.windows.Constants.KEY_DELETE_BY_HASH;
 import static org.hyperledger.bela.windows.Constants.KEY_END;
 import static org.hyperledger.bela.windows.Constants.KEY_FORWARD;
 import static org.hyperledger.bela.windows.Constants.KEY_LOOKUP_BY_HASH;
@@ -83,6 +84,7 @@ public class BlockChainBrowserWindow implements BelaWindow {
                 .addControl("Close", KEY_CLOSE, window::close)
                 .addControl("Roll Head", KEY_ROLL_HEAD, this::rollHead)
                 .addControl("Hash?", KEY_LOOKUP_BY_HASH, this::findByHash)
+                .addControl("Delete BlockHash?", KEY_DELETE_BY_HASH, this::deleteByHash)
                 .addControl("Number?", KEY_LOOKUP_BY_NUMBER, this::findByNumber);
         window.addWindowListener(controls);
         panel.addComponent(controls.createComponent());
@@ -125,6 +127,22 @@ public class BlockChainBrowserWindow implements BelaWindow {
             log.error("There was an error when moving browser", e);
             BelaExceptionDialog.showException(gui, e);
         }
+    }
+
+    private void deleteByHash() {
+
+        final String s = TextInputDialog.showDialog(gui, "Enter Hash", "Hash", browser.getBlockHash());
+        final MessageDialogButton messageDialogButton = new MessageDialogBuilder()
+            .setTitle("Are you sure?")
+            .setText("EXTREME Danger! You will delete block and trie log for hash\n" +s)
+            .addButton(MessageDialogButton.Cancel)
+            .addButton(MessageDialogButton.OK)
+            .build()
+            .showDialog(gui);
+        if (messageDialogButton.equals(MessageDialogButton.OK)) {
+            browser.deleteHash(Hash.fromHexString(s));
+        }
+
     }
 
     private void findByHash() {
