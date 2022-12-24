@@ -1,5 +1,8 @@
 package org.hyperledger.bela.windows;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import com.googlecode.lanterna.TerminalSize;
@@ -26,7 +29,7 @@ public class RocksDBViewer extends AbstractBelaWindow {
     private static final Pattern HEX_ONLY = Pattern.compile("^[0-9A-Fa-f]+$");
     private final ComboBox<KeyValueSegmentIdentifier> identifierCombo = new ComboBox<>(KeyValueSegmentIdentifier.values());
     private final TextBox keyBox = new TextBox(new TerminalSize(80, 1));
-    private final TextBox valueBox = new TextBox(new TerminalSize(80, 1));
+    private final TextBox valueBox = new TextBox(new TerminalSize(80, 20));
     private final StorageProviderFactory storageProviderFactory;
     private final WindowBasedTextGUI gui;
 
@@ -89,6 +92,8 @@ public class RocksDBViewer extends AbstractBelaWindow {
                     .toArrayUnsafe());
             if (value.isPresent()) {
                 valueBox.setText(Bytes.wrap(value.get()).toHexString());
+                Files.write(Paths.get("./hexOutput.txt"),
+                    Bytes.wrap(value.get()).toHexString().getBytes());
             } else {
                 valueBox.setText("Not found...");
             }
