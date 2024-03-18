@@ -3,7 +3,7 @@ package org.hyperledger.bela.utils.bonsai;
 public enum BonsaiTraversalTrieType {
     Storage("#"), Account("@");
 
-    private String text;
+    private final String text;
 
     BonsaiTraversalTrieType(final String text) {
 

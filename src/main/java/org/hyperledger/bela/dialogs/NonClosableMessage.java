@@ -2,6 +2,8 @@ package org.hyperledger.bela.dialogs;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.EmptySpace;
 import com.googlecode.lanterna.gui2.GridLayout;
@@ -28,7 +30,7 @@ public class NonClosableMessage extends DialogWindow {
         mainPanel.addComponent(new Label(text));
         mainPanel.addComponent(new EmptySpace(TerminalSize.ONE));
         setComponent(mainPanel);
-        setHints(Arrays.asList(Window.Hint.CENTERED));
+        setHints(List.of(Hint.CENTERED));
     }
 
     public static NonClosableMessage showMessage(final WindowBasedTextGUI gui, final String text) {

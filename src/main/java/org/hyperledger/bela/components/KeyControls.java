@@ -58,9 +58,7 @@ public class KeyControls implements BelaComponent<Panel>, WindowListener {
         };
     }
 
-    ;
-
-    private Panel newControlPanel(final String label, final String key, Runnable action) {
+  private Panel newControlPanel(final String label, final String key, Runnable action) {
         Panel panel = new Panel(new LinearLayout());
         panel.addComponent(new Button(label, action).setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center, LinearLayout.GrowPolicy.None)));
         panel.addComponent(new Label("(" + key + ")").setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center, LinearLayout.GrowPolicy.None)));

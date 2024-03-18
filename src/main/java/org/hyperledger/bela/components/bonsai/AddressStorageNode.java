@@ -1,18 +1,17 @@
 package org.hyperledger.bela.components.bonsai;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Component;
 import com.googlecode.lanterna.gui2.Panel;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.hyperledger.besu.datatypes.Address;
-import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.datatypes.StorageSlotKey;
-import org.hyperledger.besu.ethereum.bonsai.BonsaiValue;
+import org.hyperledger.besu.ethereum.trie.bonsai.BonsaiValue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class AddressStorageNode extends AbstractBonsaiNode {
   private final Map<StorageSlotKey, BonsaiValue<UInt256>> tree;

@@ -15,5 +15,5 @@ public interface BelaWindow {
 
     Panel createMainPanel();
 
-    default void close(){};
+    default void close(){}
 }

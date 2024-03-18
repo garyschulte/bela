@@ -1,11 +1,5 @@
 package org.hyperledger.bela.windows;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.LinearLayout;
@@ -20,7 +14,11 @@ import org.hyperledger.bela.utils.StorageProviderFactory;
 import org.hyperledger.bela.utils.bonsai.BonsaiListener;
 import org.hyperledger.bela.utils.bonsai.BonsaiTraversalTrieType;
 import org.hyperledger.besu.datatypes.Hash;
-import org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.DatabaseMetadata;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.pe.kwonnam.slf4jlambda.LambdaLoggerFactory.getLogger;
 import static org.hyperledger.bela.windows.Constants.KEY_CONVERT_TO_BONSAI;
@@ -92,16 +90,6 @@ public class DatabaseConversionWindow extends AbstractBelaWindow implements Bons
 
             });
             runningLabel.setText("Running...");
-        }
-    }
-
-    private void setDbMetadataVersion(int version) {
-        try {
-            new DatabaseMetadata(2, Optional.empty())
-                    .writeToDirectory(storageProviderFactory.getDataPath());
-        } catch (IOException e) {
-            log.error("There was an error when setting the metadata version to version {}", version, e);
-            throw new IllegalStateException("Failed to write db metadata version");
         }
     }
 

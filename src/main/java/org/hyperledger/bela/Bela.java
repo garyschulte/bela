@@ -19,7 +19,6 @@ import org.hyperledger.bela.windows.Constants;
 import org.hyperledger.bela.windows.DatabaseConversionWindow;
 import org.hyperledger.bela.windows.LogoWindow;
 import org.hyperledger.bela.windows.MainWindow;
-import org.hyperledger.bela.windows.P2PManagementWindow;
 import org.hyperledger.bela.windows.RocksDBViewer;
 import org.hyperledger.bela.windows.SegmentManipulationWindow;
 import org.hyperledger.bela.windows.SettingsWindow;
@@ -38,8 +37,7 @@ public class Bela {
 
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
         terminalFactory.setInitialTerminalSize(new TerminalSize(120, 35));
-        try (Screen screen = terminalFactory.createScreen();
-             ) {
+        try (Screen screen = terminalFactory.createScreen()) {
             screen.startScreen();
 
             final WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
@@ -54,7 +52,6 @@ public class Bela {
             mainWindow.registerWindow(new BonsaiTreeVerifierWindow(gui, storageProviderFactory));
             mainWindow.registerWindow(new DatabaseConversionWindow(storageProviderFactory));
             mainWindow.registerWindow(new LogoWindow());
-            mainWindow.registerWindow(new P2PManagementWindow(gui, storageProviderFactory, preferences));
             mainWindow.registerWindow(new RocksDBViewer(gui, storageProviderFactory));
             mainWindow.registerWindow(new SegmentManipulationWindow(gui, storageProviderFactory, preferences));
             mainWindow.registerWindow(new BonsaiStorageBrowserWindow(gui, storageProviderFactory));

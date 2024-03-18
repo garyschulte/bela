@@ -12,7 +12,7 @@ public class ThemePicker implements BelaComponent<ComboBox<String>>, ComboBox.Li
     public static final List<String> REGISTERED_THEMES = new ArrayList<>(LanternaThemes.getRegisteredThemes());
     private String savedTheme;
     private String currentTheme;
-    private WindowBasedTextGUI gui;
+    private final WindowBasedTextGUI gui;
 
     public ThemePicker(final WindowBasedTextGUI gui, final String savedTheme) {
         this.gui = gui;

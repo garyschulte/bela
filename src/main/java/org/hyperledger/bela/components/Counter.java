@@ -6,7 +6,7 @@ import com.googlecode.lanterna.gui2.LinearLayout;
 import com.googlecode.lanterna.gui2.Panel;
 
 public class Counter implements BelaComponent<Panel> {
-    private Label number = new Label("0");
+    private final Label number = new Label("0");
 
     private final String name;
 

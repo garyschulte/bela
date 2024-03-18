@@ -3,9 +3,8 @@ package org.hyperledger.bela.components.bonsai.queries;
 import kr.pe.kwonnam.slf4jlambda.LambdaLogger;
 import org.hyperledger.besu.datatypes.AccountValue;
 import org.hyperledger.besu.datatypes.Hash;
-import org.hyperledger.besu.ethereum.bonsai.BonsaiValue;
-import org.hyperledger.besu.ethereum.bonsai.trielog.TrieLogLayer;
-import org.hyperledger.besu.ethereum.worldstate.StateTrieAccountValue;
+import org.hyperledger.besu.ethereum.trie.bonsai.BonsaiValue;
+import org.hyperledger.besu.ethereum.trie.bonsai.trielog.TrieLogLayer;
 
 import static kr.pe.kwonnam.slf4jlambda.LambdaLoggerFactory.getLogger;
 

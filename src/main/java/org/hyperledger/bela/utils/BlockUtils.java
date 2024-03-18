@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 public class BlockUtils {
     private static final ObjectMapper mapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
-    ;
-    private static final Logger LOG = LoggerFactory.getLogger(Bela.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Bela.class);
 
     public static String prettyPrintBlockHeader(final BlockResult header) {
         try {

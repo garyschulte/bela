@@ -23,12 +23,15 @@ import org.hyperledger.bela.utils.BlockChainContext;
 import org.hyperledger.bela.utils.BlockChainContextFactory;
 import org.hyperledger.bela.utils.StorageProviderFactory;
 import org.hyperledger.besu.datatypes.Hash;
-import org.hyperledger.besu.ethereum.bonsai.BonsaiWorldStateProvider;
-import org.hyperledger.besu.ethereum.bonsai.cache.CachedMerkleTrieLoader;
-import org.hyperledger.besu.ethereum.bonsai.worldview.BonsaiWorldStateUpdateAccumulator;
 import org.hyperledger.besu.ethereum.chain.ChainHead;
 import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
+import org.hyperledger.besu.ethereum.trie.bonsai.BonsaiWorldStateProvider;
+import org.hyperledger.besu.ethereum.trie.bonsai.cache.CachedMerkleTrieLoader;
+import org.hyperledger.besu.ethereum.trie.bonsai.storage.BonsaiWorldStateKeyValueStorage;
+import org.hyperledger.besu.ethereum.trie.bonsai.worldview.BonsaiWorldStateUpdateAccumulator;
+import org.hyperledger.besu.ethereum.worldstate.DataStorageConfiguration;
+import org.hyperledger.besu.evm.internal.EvmConfiguration;
 import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
@@ -154,10 +157,15 @@ public class BonsaiTrieLogLayersViewer extends AbstractBelaWindow {
         final BlockChainContext blockChainContext = BlockChainContextFactory.createBlockChainContext(provider);
 
         final NoOpMetricsSystem noOpMetricsSystem = new NoOpMetricsSystem();
+        final BonsaiWorldStateKeyValueStorage storage = new BonsaiWorldStateKeyValueStorage(
+            provider, noOpMetricsSystem, DataStorageConfiguration.DEFAULT_BONSAI_CONFIG);
         final BonsaiWorldStateProvider archive = new BonsaiWorldStateProvider(
-            provider,
+            storage,
             blockChainContext.getBlockchain(),
-            new CachedMerkleTrieLoader(noOpMetricsSystem),noOpMetricsSystem, null);
+            Optional.empty(),
+            new CachedMerkleTrieLoader(noOpMetricsSystem),
+            null,
+            EvmConfiguration.DEFAULT);
 
         return (BonsaiWorldStateUpdateAccumulator) archive.getMutable().updater();
 
