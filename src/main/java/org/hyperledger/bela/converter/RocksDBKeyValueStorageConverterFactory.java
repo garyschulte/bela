@@ -126,7 +126,7 @@ public class RocksDBKeyValueStorageConverterFactory implements KeyValueStorageFa
       throw new StorageException(message);
     }
 
-    if (!SUPPORTED_VERSIONS.contains(databaseMetadata)) {
+    if (!SUPPORTED_VERSIONS.contains(databaseMetadata.getVersionedStorageFormat().getVersion())) {
       final String message = "Unsupported RocksDB Metadata version of: " + databaseMetadata;
       LOG.error(message);
       throw new StorageException(message);
