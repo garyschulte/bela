@@ -25,7 +25,7 @@ import org.hyperledger.bela.components.BlockPanel;
 import org.hyperledger.bela.components.SummaryPanel;
 import org.hyperledger.bela.model.BlockResult;
 import org.hyperledger.besu.datatypes.Hash;
-import org.hyperledger.besu.ethereum.bonsai.BonsaiWorldStateKeyValueStorage;
+import org.hyperledger.besu.ethereum.bonsai.storage.BonsaiWorldStateKeyValueStorage;
 import org.hyperledger.besu.ethereum.chain.DefaultBlockchain;
 import org.hyperledger.besu.ethereum.core.Block;
 
@@ -54,7 +54,7 @@ public class BlockChainBrowser {
 
 
     public static BlockChainBrowser fromBlockChainContext(final BlockChainContext blockChainContext) {
-        return new BlockChainBrowser((DefaultBlockchain) blockChainContext.getBlockchain()/*, worldStateArchive*/, blockChainContext.getWorldStateStorage());
+        return new BlockChainBrowser((DefaultBlockchain) blockChainContext.getBlockchain(), blockChainContext.getWorldStateStorage());
     }
 
 

@@ -12,14 +12,14 @@ import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
 import org.hyperledger.besu.ethereum.trie.CompactEncoding;
-import org.hyperledger.besu.ethereum.trie.MerklePatriciaTrie;
 import org.hyperledger.besu.ethereum.trie.Node;
-import org.hyperledger.besu.ethereum.trie.TrieNodeDecoder;
+import org.hyperledger.besu.ethereum.trie.patricia.TrieNodeDecoder;
 import org.hyperledger.besu.ethereum.worldstate.StateTrieAccountValue;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
 import static kr.pe.kwonnam.slf4jlambda.LambdaLoggerFactory.getLogger;
 import static org.hyperledger.besu.ethereum.trie.CompactEncoding.bytesToPath;
+import static org.hyperledger.besu.ethereum.trie.MerkleTrie.EMPTY_TRIE_NODE_HASH;
 
 public class BonsaiTraversal {
     private static final LambdaLogger log = getLogger(BonsaiTraversal.class);
@@ -79,13 +79,15 @@ public class BonsaiTraversal {
         }
 
         final List<Node<Bytes>> nodes =
-                TrieNodeDecoder.decodeNodes(parentNode.getLocation().orElseThrow(), parentNode.getRlp());
+                TrieNodeDecoder.decodeNodes(parentNode.getLocation().orElseThrow(), parentNode.getEncodedBytes());
         nodes.forEach(
                 node -> {
+                    // node is a branch node
                     if (nodeIsHashReferencedDescendant(parentNode, node)) {
                         traverseAccountTrie(
                                 getAccountNodeValue(node.getHash(), node.getLocation().orElseThrow()));
                     } else {
+                        // node is a leaf node
                         if (node.getValue().isPresent()) {
                             final StateTrieAccountValue accountValue =
                                     StateTrieAccountValue.readFrom(RLP.input(node.getValue().orElseThrow()));
@@ -106,8 +108,12 @@ public class BonsaiTraversal {
                             // Add code, if appropriate
                             if (!accountValue.getCodeHash().equals(Hash.EMPTY)) {
                                 // traverse code
-                                final Optional<Bytes> code =
+                                // stored by code hash (CodeHashCodeStorageStrategy) by default since 24.5.2
+                                Optional<Bytes> code = codeStorage.get(accountValue.getCodeHash().toArrayUnsafe()).map(Bytes::wrap);
+                                // if empty, try by account hash instead
+                                if (code.isEmpty()) code =
                                         codeStorage.get(accountHash.toArrayUnsafe()).map(Bytes::wrap);
+                                // if still empty, it's missing
                                 if (code.isEmpty()) {
                                     listener.missingCodeHash(accountValue.getCodeHash(), accountHash);
                                 } else {
@@ -118,7 +124,7 @@ public class BonsaiTraversal {
                                 }
                             }
                             // Add storage, if appropriate
-                            if (!accountValue.getStorageRoot().equals(MerklePatriciaTrie.EMPTY_TRIE_NODE_HASH)) {
+                            if (!accountValue.getStorageRoot().equals(EMPTY_TRIE_NODE_HASH)) {
                                 traverseStorageTrie(
                                         accountHash,
                                         getStorageNodeValue(accountValue.getStorageRoot(), accountHash, Bytes.EMPTY));
@@ -142,7 +148,7 @@ public class BonsaiTraversal {
         listener.visited(BonsaiTraversalTrieType.Storage);
 
         final List<Node<Bytes>> nodes =
-                TrieNodeDecoder.decodeNodes(parentNode.getLocation().orElseThrow(), parentNode.getRlp());
+                TrieNodeDecoder.decodeNodes(parentNode.getLocation().orElseThrow(), parentNode.getEncodedBytes());
         nodes.forEach(
                 node -> {
                     if (nodeIsHashReferencedDescendant(parentNode, node)) {
@@ -190,7 +196,7 @@ public class BonsaiTraversal {
                         .get(Bytes.concatenate(accountHash, location).toArrayUnsafe())
                         .map(Bytes::wrap);
         if (bytes.isEmpty()) {
-            listener.missingStorageTrieForHash(hash, location);
+            listener.missingStorageTrieForHash(accountHash, hash, location);
             return null;
         }
         final Hash foundHashNode = Hash.hash(bytes.orElseThrow());
