@@ -122,7 +122,7 @@ public class RocksDBKeyValueStorageConverterFactory implements KeyValueStorageFa
         final int databaseVersion;
 
         if (databaseExists) {
-            databaseVersion = DatabaseMetadata.lookUpFrom(dataDir).getVersion();
+            databaseVersion = DatabaseMetadata.lookUpFrom(dataDir).getVersionedStorageFormat().getVersion();
             LOG.info("Existing database detected at {}. Version {}", dataDir, databaseVersion);
         } else {
             final String message = "No existing database detected at " + dataDir;
